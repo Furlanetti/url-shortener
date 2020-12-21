@@ -8,15 +8,6 @@ module.exports = class UrlController {
   async post(request, response) {
     const { url } = request.body;
 
-    // changes: don't create the id if the url sent is not real
-    // so, get the last id +1 and do the encoding, then do the job
-    // what if someone do two requests together.. when I really create this
-    // guy it will already exists.
-
-    // validations that are missing:
-    // 1. database is connected?
-    // 2. url returns somenthing for the title on crawlerService?
-
     try {
       if (!UrlService.isValid(url)) {
         response.status(400).json("Please digit a valid URL.").send();
@@ -34,6 +25,8 @@ module.exports = class UrlController {
 
       response.status(200).json({ shortUrl: code }).send();
     } catch (e) {
+      if (e.code === "ER_DUP_ENTRY")
+        response.status(400).json("This URL already exists.").send();
       response.status(400).json("HOUSTON WE HAVE A PROBLEM").send();
     }
   }
